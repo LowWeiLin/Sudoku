@@ -36,7 +36,7 @@ class OCR:
 	def processTrainingImage(self):		
 		img = cv2.imread('digits_modified.png')
 		gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
-		_,gray = cv2.threshold(gray,0,255,cv2.THRESH_BINARY)
+		#_,gray = cv2.threshold(gray,0,255,cv2.THRESH_BINARY)
 
 		train_data = []
 		train_labels = []

@@ -31,7 +31,7 @@ class SudokuSolver:
     warped_masked_uniform_gray = None
     warped_masked_uniform_binary = None
 
-    digit_binary = None
+    digit_gray = None
     digit_contours = []
 
     recognized_puzzle = np.zeros(((9,9)), np.uint8)
@@ -121,22 +121,23 @@ class SudokuSolver:
 
 
     def extractDigits(self):
-        warped_masked_uniform_gray_inv = 255-self.warped_masked_uniform_binary
+        warped_masked_uniform_gray_inv = 255-self.warped_masked_uniform_gray
+        warped_masked_uniform_binary_inv = 255-self.warped_masked_uniform_binary
 
         # Flood fill from 4 corners
-        h, w = warped_masked_uniform_gray_inv.shape[:2]
+        h, w = warped_masked_uniform_binary_inv.shape[:2]
         mask = np.zeros((h+2, w+2), np.uint8)
-        cv2.floodFill(warped_masked_uniform_gray_inv, mask, (0,0), 0)
-        cv2.floodFill(warped_masked_uniform_gray_inv, mask, (w-1,0), 0)
-        cv2.floodFill(warped_masked_uniform_gray_inv, mask, (0,h-1), 0)
-        cv2.floodFill(warped_masked_uniform_gray_inv, mask, (w-1,h-1), 0)
+        cv2.floodFill(warped_masked_uniform_binary_inv, mask, (0,0), 0)
+        cv2.floodFill(warped_masked_uniform_binary_inv, mask, (w-1,0), 0)
+        cv2.floodFill(warped_masked_uniform_binary_inv, mask, (0,h-1), 0)
+        cv2.floodFill(warped_masked_uniform_binary_inv, mask, (w-1,h-1), 0)
 
         # get contours
-        contours, hierarchy = cv2.findContours(warped_masked_uniform_gray_inv, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        contours, hierarchy = cv2.findContours(warped_masked_uniform_binary_inv.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         
         digit_contours_overlay_color = self.warped_masked_original_color.copy()
-        digit_contours_mask_binary =  np.zeros((warped_masked_uniform_gray_inv.shape),np.uint8)
-        digit_binary = None
+        digit_contours_mask_binary =  np.zeros((warped_masked_uniform_binary_inv.shape),np.uint8)
+        digit_gray = None
         digit_contours = []
 
         for i in contours:
@@ -153,9 +154,9 @@ class SudokuSolver:
 
                 digit_contours.append(i)
 
-        digit_binary = cv2.bitwise_and(digit_contours_mask_binary, warped_masked_uniform_gray_inv) * 255
+        digit_gray = cv2.bitwise_and(warped_masked_uniform_gray_inv, warped_masked_uniform_gray_inv, mask=digit_contours_mask_binary)
 
-        self.digit_binary = digit_binary
+        self.digit_gray = digit_gray
         self.digit_contours = digit_contours
 
 
@@ -165,10 +166,10 @@ class SudokuSolver:
             self.ocr = OCR()
             self.ocr.loadData()
 
-        digit_binary = self.digit_binary.copy()
+        digit_gray = self.digit_gray.copy()
         # Pad borders so that digits close to edges can still be extracted
         padding = 50
-        digit_binary = cv2.copyMakeBorder(digit_binary,padding,padding,padding,padding,cv2.BORDER_CONSTANT,value=0)
+        digit_gray = cv2.copyMakeBorder(digit_gray,padding,padding,padding,padding,cv2.BORDER_CONSTANT,value=0)
 
         # Process and recognize each digit
         for i in self.digit_contours:
@@ -184,8 +185,8 @@ class SudokuSolver:
 
             # Extact digit
             # Get image of the digit, cropped o bounding rectangle
-            # Add padding to account for padding of digit_binary
-            digit = digit_binary[y+padding:y+h+padding,x+padding:x+w+padding]
+            # Add padding to account for padding of digit_gray
+            digit = digit_gray[y+padding:y+h+padding,x+padding:x+w+padding]
 
             # Skip if unable to get image
             if len(digit) == 0:
