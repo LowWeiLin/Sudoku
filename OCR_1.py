@@ -12,6 +12,11 @@ import cv2
 # Uses pixel values as features for training/recognition
 # Uses kNN for classification
 #
+# Useful Resources
+# ----------------
+# 1 - http://docs.opencv.org/trunk/doc/py_tutorials/py_ml/py_knn/py_knn_understanding/py_knn_understanding.html
+# 2 - http://docs.opencv.org/trunk/doc/py_tutorials/py_ml/py_knn/py_knn_opencv/py_knn_opencv.html
+#
 # Usage
 # -----
 # Run this python file to generate data file

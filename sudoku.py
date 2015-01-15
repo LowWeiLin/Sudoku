@@ -2,6 +2,17 @@ import numpy as np
 import cv2
 from OCR_1 import OCR
 
+# Summary
+# -------
+# Recognizes a sudodu puzzle from an image and extracts the puzzle
+# *Does not solve the puzzle (yet)
+#
+# Modified from 
+# 1 - http://opencvpython.blogspot.sg/2012/06/sudoku-solver-part-1.html
+# 2 - http://www.aishack.in/tutorials/sudoku-grabber-with-opencv-plot/
+# Main modifications are in the pre processing of images, and how digits are extracted.
+#
+
 class SudokuSolver:
     original_color = None
     original_gray = None
