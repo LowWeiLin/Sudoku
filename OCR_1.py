@@ -56,7 +56,7 @@ class OCR:
 		self.train_data = train_data
 		self.train_labels = train_labels
 
-		print "Training done on", len(self.train_labels), "characters."
+		print "Processed", len(self.train_labels), "characters."
 
 
 	def saveData(self):
