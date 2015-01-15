@@ -42,6 +42,7 @@ class OCR:
 	def processTrainingImage(self):		
 		img = cv2.imread('digits_modified.png')
 		gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+		_,gray = cv2.threshold(gray,0,255,cv2.THRESH_BINARY)
 
 		train_data = []
 		train_labels = []
@@ -51,14 +52,14 @@ class OCR:
 		for i in contours:
 		    area = cv2.contourArea(i)
 		    [x,y,w,h] = cv2.boundingRect(i)
-		    if area>20:
+		    if area>18:
 				label = int(y/100)
 
 				digit_image = gray[y:y+h,x:x+w]
 				digit_image = self.resizeToSquare(digit_image)
 				digit_image = self.deskew(digit_image)
 				data = self.hog(digit_image)
-				
+
 				train_data.append(data)
 				train_labels.append([label])
 

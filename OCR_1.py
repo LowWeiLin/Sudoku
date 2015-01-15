@@ -30,9 +30,13 @@ class OCR:
 	train_data = []
 	train_labels = []
 
+	SZ=20
+	affine_flags = cv2.WARP_INVERSE_MAP|cv2.INTER_LINEAR
+
 	def processTrainingImage(self):		
 		img = cv2.imread('digits_modified.png')
 		gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+		_,gray = cv2.threshold(gray,0,255,cv2.THRESH_BINARY)
 
 		train_data = []
 		train_labels = []
@@ -42,12 +46,13 @@ class OCR:
 		for i in contours:
 		    area = cv2.contourArea(i)
 		    [x,y,w,h] = cv2.boundingRect(i)
-		    if area>20:
+		    if area>18:
 				label = int(y/100)
 
 				digit_image = gray[y:y+h,x:x+w]
-				data_image = self.resizeToSquare(digit_image)
-				data = data_image.reshape(20*20)
+				digit_image = self.resizeToSquare(digit_image)
+				digit_image = self.deskew(digit_image)
+				data = digit_image.reshape(20*20)
 
 				train_data.append(data)
 				train_labels.append(label)
@@ -73,9 +78,10 @@ class OCR:
 	# img takes in image of character cropped to its bounding rectangle
 	def recognizeCharacter(self, img):
 		feature = self.resizeToSquare(img)
+		feature = self.deskew(feature)
 		feature = feature.reshape(1, 20*20)
 		feature = np.float32(feature)
-		ret,result,neighbours,dist = self.knn.find_nearest(feature, k=3)
+		ret,result,neighbours,dist = self.knn.find_nearest(feature, k=5)
 		return result[0][0]
 		
 
@@ -93,7 +99,14 @@ class OCR:
 		image_resized = cv2.copyMakeBorder(image_resized, padding, padding, padding, padding, cv2.BORDER_CONSTANT, value=0)	
 		return image_resized
 
-
+	def deskew(self, img):
+		m = cv2.moments(img)
+		if abs(m['mu02']) < 1e-2:
+			return img.copy()
+		skew = m['mu11']/m['mu02']
+		M = np.float32([[1, skew, -0.5*self.SZ*skew], [0, 1, 0]])
+		img = cv2.warpAffine(img,M,(self.SZ, self.SZ),flags=self.affine_flags)
+		return img
 
 if __name__ == '__main__':
 	ocr = OCR()
