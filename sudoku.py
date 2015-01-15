@@ -10,8 +10,6 @@ class SudokuSolver:
     uniform_blur_gray = None
     threshold_original_blur_gray = None
     threshold_uniform_blur_gray = None
-    contour_actual_color = None
-    contour_approx_color = None
 
     contour_actual = None
     contour_approx = None
@@ -53,12 +51,6 @@ class SudokuSolver:
         self.threshold_original_blur_gray = cv2.adaptiveThreshold(self.original_blur_gray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV,5,2)
         self.threshold_uniform_blur_gray = cv2.adaptiveThreshold(self.uniform_blur_gray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV,5,2)
 
-        # cv2.imshow("Original image gray", self.original_gray)
-        # cv2.imshow("Uniform image gray", self.uniform_gray)
-
-        # cv2.imshow("Threshold original image gray", self.threshold_original_blur_gray)
-        # cv2.imshow("Threshold uniform image gray", self.threshold_uniform_blur_gray)
-        
 
     def normalizeBrightness(self, img_gray):
         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(11,11))
@@ -92,19 +84,11 @@ class SudokuSolver:
         self.contour_actual = biggest_actual
         self.contour_approx = biggest_approx
 
-        # Get contour image overlays
-        self.contour_actual_color = self.original_color.copy()
-        self.contour_approx_color = self.original_color.copy()
-        cv2.drawContours(self.contour_actual_color, [biggest_actual],0,(255,0,0),2)
-        cv2.drawContours(self.contour_approx_color, [biggest_approx],0,(0,255,0),2)
-
         # Get mask
         self.puzzle_actual_mask = np.zeros((self.original_gray.shape),np.uint8)
         cv2.drawContours(self.puzzle_actual_mask,[self.contour_actual],0,255,-1)
         cv2.drawContours(self.puzzle_actual_mask,[self.contour_actual],0,0,2)
 
-        # cv2.imshow("Contour actual", self.contour_actual_color)
-        # cv2.imshow("Contour approx", self.contour_approx_color)
 
     def simpleWarp(self):
         # Get masked uniform image
@@ -124,11 +108,6 @@ class SudokuSolver:
         self.warped_masked_uniform_gray = warped_masked_uniform_gray
         self.warped_masked_original_color = warped_masked_original_color
 
-        # cv2.imshow("masked uniform gray", masked_uniform_gray)
-        # cv2.imshow("warped masked original color", warped_masked_original_color)
-        # cv2.imshow("warped masked uniform gray", warped_masked_uniform_gray)
-        # cv2.imshow("warped masked uniform binary", warped_masked_uniform_binary)
-
 
     def extractDigits(self):
         warped_masked_uniform_gray_inv = 255-self.warped_masked_uniform_binary
@@ -140,8 +119,6 @@ class SudokuSolver:
         cv2.floodFill(warped_masked_uniform_gray_inv, mask, (w-1,0), 0)
         cv2.floodFill(warped_masked_uniform_gray_inv, mask, (0,h-1), 0)
         cv2.floodFill(warped_masked_uniform_gray_inv, mask, (w-1,h-1), 0)
-
-        #cv2.imshow("warped_masked_uniform_gray_inv", warped_masked_uniform_gray_inv)
 
         # get contours
         contours, hierarchy = cv2.findContours(warped_masked_uniform_gray_inv, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -170,22 +147,6 @@ class SudokuSolver:
         self.digit_binary = digit_binary
         self.digit_contours = digit_contours
 
-        #cv2.imshow("digit contours overlay color", digit_contours_overlay_color)
-        #cv2.imshow("digit contours mask binary", digit_contours_mask_binary)
-
-        # Draw approx grid
-
-        # for i in range(1,9):
-        #     pt1 = (0, 50*i)
-        #     pt2 = (449, 50*i)
-        #     cv2.line(digit_binary, pt1, pt2, 255)
-        #     pt1 = (50*i, 0)
-        #     pt2 = (50*i, 449)
-        #     cv2.line(digit_binary, pt1, pt2, 255)
-
-
-        # cv2.imshow("digit binary", digit_binary)
-
 
     def recognizeDigits(self):
         # Initialize OCR if it is not yet initialized
@@ -204,10 +165,8 @@ class SudokuSolver:
             M = cv2.moments(i)
             cx = int(M['m10']/M['m00'])
             cy = int(M['m01']/M['m00'])
-            centroid = (cx, cy)
             # Find which cell it belongs to
             cell = (int(cx/50), int(cy/50))
-            #print cell
 
             # Get bounding rectangle
             [x,y,w,h] = cv2.boundingRect(i)
@@ -223,8 +182,6 @@ class SudokuSolver:
 
             # Set results
             self.recognized_puzzle[cell[1]][cell[0]] = self.ocr.recognizeCharacter(digit)
-
-        #print self.recognized_puzzle
 
         # Draw text on image to verify
         warped_masked_original_color = self.warped_masked_original_color.copy()
@@ -251,52 +208,6 @@ class SudokuSolver:
         hnew[3] = h[np.argmax(diff)]
   
         return hnew
-
-
-    # Resize image to a square. Maintains scale and pads edges if necessary.
-    def resizeToSquare(self, image, length=16, padding=2):
-        (h, w) = image.shape
-        ratio = min(float(length)/float(w), float(length)/float(h))
-        image_resized = cv2.resize(image, (0,0), fx=ratio, fy=ratio)
-        (h, w) = image_resized.shape
-        if (h, w) != (length, length):
-            image_resized = cv2.copyMakeBorder(image_resized, (length-h)/2, 0, (length-w)/2, 0, cv2.BORDER_CONSTANT, value=0)
-        (h, w) = image_resized.shape
-        if (h, w) != (length, length):
-            image_resized = cv2.copyMakeBorder(image_resized, 0, length-h, 0, length-w, cv2.BORDER_CONSTANT, value=0)
-        image_resized = cv2.copyMakeBorder(image_resized, padding, padding, padding, padding, cv2.BORDER_CONSTANT, value=0)
-        return image_resized
-
-    def deskew(self, img):
-        SZ=20
-        affine_flags = cv2.WARP_INVERSE_MAP|cv2.INTER_LINEAR
-        m = cv2.moments(img)
-        if abs(m['mu02']) < 1e-2:
-            return img.copy()
-        skew = m['mu11']/m['mu02']
-        M = np.float32([[1, skew, -0.5*SZ*skew], [0, 1, 0]])
-        img = cv2.warpAffine(img,M,(SZ, SZ),flags=affine_flags)
-        return img
-
-    def hog(self, img):
-        bin_n = 16 # Number of bins
-        
-        # deskew img
-        img = self.deskew(img)
-
-        gx = cv2.Sobel(img, cv2.CV_32F, 1, 0)
-        gy = cv2.Sobel(img, cv2.CV_32F, 0, 1)
-        mag, ang = cv2.cartToPolar(gx, gy)
-
-        # quantizing binvalues in (0...16)
-        bins = np.int32(bin_n*ang/(2*np.pi))
-
-        # Divide to 4 sub-squares
-        bin_cells = bins[:10,:10], bins[10:,:10], bins[:10,10:], bins[10:,10:]
-        mag_cells = mag[:10,:10], mag[10:,:10], mag[:10,10:], mag[10:,10:]
-        hists = [np.bincount(b.ravel(), m.ravel(), bin_n) for b, m in zip(bin_cells, mag_cells)]
-        hist = np.hstack(hists)
-        return hist
 
 
 #
