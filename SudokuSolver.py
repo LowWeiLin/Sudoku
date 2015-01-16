@@ -210,6 +210,7 @@ class SudokuSolver:
 #
 if __name__ == '__main__':
     extractor = SudokuExtractor()
-    extractor.extract()
-    SudokuSolver().solve(extractor.recognized_puzzle)
+    extractor.extract("sudoku_original.jpg")
+    solution = SudokuSolver().solve(extractor.recognized_puzzle)
+    extractor.showOverlayPuzzle(solution, "Solved puzzle")
     cv2.waitKey()

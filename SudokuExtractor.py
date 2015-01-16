@@ -38,8 +38,8 @@ class SudokuExtractor:
 
     ocr = None
 
-    def extract(self):
-        self.getPuzzle()
+    def extract(self, image_filename="sudoku_original.jpg"):
+        self.getPuzzle(image_filename)
         self.preprocessImages()
         self.findPuzzle()
         self.simpleWarp()
@@ -47,8 +47,8 @@ class SudokuExtractor:
         self.recognizeDigits()
 
 
-    def getPuzzle(self):  
-        self.original_color = cv2.imread("sudoku_original_3.jpg")
+    def getPuzzle(self, image_filename):
+        self.original_color = cv2.imread(image_filename)
         cv2.imshow("Original image color", self.original_color)
 
 
@@ -195,14 +195,23 @@ class SudokuExtractor:
             self.recognized_puzzle[cell[1]][cell[0]] = self.ocr.recognizeCharacter(digit)
 
         # Draw text on image to verify
+        self.showOverlayPuzzle()
+
+
+    def showOverlayPuzzle(self, puzzle=None, window_name="Recognized puzzle"):
+        if puzzle == None:
+            puzzle = self.recognized_puzzle
         warped_masked_original_color = self.warped_masked_original_color.copy()
         for y in range(0,9):
             for x in range(0,9):
-                num = self.recognized_puzzle[y][x]
+                num = puzzle[y][x]
                 if num != 0:
-                    cv2.putText(warped_masked_original_color,str(num), (x*50+25,y*50+35), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,0))
-
-        cv2.imshow("Recognized puzzle", warped_masked_original_color)
+                    if self.recognized_puzzle[y][x] != 0:
+                        cv2.putText(warped_masked_original_color,str(num), (x*50+25,y*50+35), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,0))
+                    else:
+                        cv2.putText(warped_masked_original_color,str(num), (x*50+25,y*50+35), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,0,0))
+        
+        cv2.imshow(window_name, warped_masked_original_color)
 
 
     # Rectify - reshapes and sorts the order of points in a contour.
