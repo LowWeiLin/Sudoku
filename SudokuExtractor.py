@@ -13,7 +13,7 @@ from OCR_1 import OCR
 # Main modifications are in the pre processing of images, and how digits are extracted.
 #
 
-class SudokuSolver:
+class SudokuExtractor:
     original_color = None
     original_gray = None
     original_blur_gray = None
@@ -38,7 +38,7 @@ class SudokuSolver:
 
     ocr = None
 
-    def solve(self):
+    def extract(self):
         self.getPuzzle()
         self.preprocessImages()
         self.findPuzzle()
@@ -48,7 +48,7 @@ class SudokuSolver:
 
 
     def getPuzzle(self):  
-        self.original_color = cv2.imread("sudoku_original.jpg")
+        self.original_color = cv2.imread("sudoku_original_3.jpg")
         cv2.imshow("Original image color", self.original_color)
 
 
@@ -225,5 +225,5 @@ class SudokuSolver:
 #   Main Entry Point
 #
 if __name__ == '__main__':
-    SudokuSolver().solve()
+    SudokuExtractor().extract()
     cv2.waitKey()
