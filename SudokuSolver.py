@@ -34,21 +34,29 @@ class SudokuSolver:
                 print solution
                 return solution
             # stop if no change to potential solutions
-            if potentialAnswersCount == self.countPotentialAnswers():
-                print "No change. Multiple solutions?"
-                break
+            elif potentialAnswersCount == self.countPotentialAnswers():
+                # multiple solutios
+                # find a cell with more than one possibility and pick one
+                picked = False
+                for y in range(0,9):
+                    for x in range(0,9):
+                        if len(self.potentialSolutions[y][x]) > 1:
+                            picked = True
+                            self.potentialSolutions[y][x] = [self.potentialSolutions[y][x][0]]
+                            break
+                    if picked:
+                        break
+                assert picked
             # stop if any cell has no potential answers
-            if self.noSolutionFound():
+            elif self.noSolutionFound():
                 print "No solution found"
                 return None
 
             potentialAnswersCount = self.countPotentialAnswers()
 
         self.printPotentialSolutions()
-
-        # TODO: Handle case where multiple solutions are possible
+        
         return self.potentialSolutions
-
 
     def printPotentialSolutions(self):
         # print potential solutions
@@ -68,12 +76,14 @@ class SudokuSolver:
         for y in range(0,9):
             total = sum(puzzle[y,:])
             if total != self.checkNumber:
+                # print "row", y
                 return False
 
         # Check columns
         for x in range(0,9):
             total = sum(puzzle[:,x])
             if total != self.checkNumber:
+                # print "col", x
                 return False
                 
         # Check boxes
@@ -81,12 +91,14 @@ class SudokuSolver:
             for x in range(0,9,3):
                 total = sum(map(sum, puzzle[y:y+3,x:x+3]))
                 if total != self.checkNumber:
+                    # print "box", x, y, puzzle[y:y+3,x:x+3]
                     return False
 
         # Check all numbers are between 1-9 inclusive
         for y in range(0,9):
             for x in range(0,9):
                 if puzzle[y][x] > 9 or puzzle[y][x] < 1:
+                    # print "inc", x, y, puzzle[y][x]
                     return False
 
         return True
