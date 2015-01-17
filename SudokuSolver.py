@@ -204,6 +204,29 @@ class SudokuSolver:
 
         #print self.potentialSolutions
 
+oneSolution = [
+    [0, 0, 8, 6, 0, 2, 0, 0, 0],
+    [2, 5, 0, 9, 1, 7, 0, 0, 0],
+    [1, 0, 0, 0, 3, 0, 0, 0, 0],
+    [6, 4, 0, 0, 0, 0, 5, 0, 0],
+    [8, 0, 7, 5, 9, 3, 1, 0, 4],
+    [0, 0, 3, 0, 0, 0, 0, 9, 2],
+    [0, 0, 0, 0, 6, 0, 0, 0, 8],
+    [0, 0, 0, 3, 7, 8, 0, 1, 5],
+    [0, 0, 0, 1, 0, 9, 4, 0, 0]
+]
+
+manySolutions = [
+    [9, 0, 6, 0, 7, 0, 4, 0, 3],
+    [0, 0, 0, 4, 0, 0, 2, 0, 0],
+    [0, 7, 0, 0, 2, 3, 0, 1, 0],
+    [5, 0, 0, 0, 0, 0, 1, 0, 0],
+    [0, 4, 0, 2, 0, 8, 0, 6, 0],
+    [0, 0, 3, 0, 0, 0, 0, 0, 5],
+    [0, 3, 0, 7, 0, 0, 0, 5, 0],
+    [0, 0, 7, 0, 0, 5, 0, 0, 0],
+    [4, 0, 5, 0, 1, 0, 7, 0, 8]
+]
 
 #
 #   Main Entry Point
@@ -211,6 +234,7 @@ class SudokuSolver:
 if __name__ == '__main__':
     extractor = SudokuExtractor()
     extractor.extract("sudoku_original.jpg")
-    solution = SudokuSolver().solve(extractor.recognized_puzzle)
+    puzzle = extractor.recognized_puzzle
+    solution = SudokuSolver().solve(puzzle)
     extractor.showOverlayPuzzle(solution, "Solved puzzle")
     cv2.waitKey()
