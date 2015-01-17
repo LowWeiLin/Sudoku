@@ -69,36 +69,49 @@ class SudokuSolver:
         for y in range(0,9):
             print map(len,self.potentialSolutions[y])
 
-
-    checkNumber = (1+2+3+4+5+6+7+8+9)
     def verify(self, puzzle):
-        # Check rows
-        for y in range(0,9):
-            total = sum(puzzle[y,:])
-            if total != self.checkNumber:
-                # print "row", y
-                return False
-
-        # Check columns
-        for x in range(0,9):
-            total = sum(puzzle[:,x])
-            if total != self.checkNumber:
-                # print "col", x
-                return False
-                
-        # Check boxes
-        for y in range(0,9,3):
-            for x in range(0,9,3):
-                total = sum(map(sum, puzzle[y:y+3,x:x+3]))
-                if total != self.checkNumber:
-                    # print "box", x, y, puzzle[y:y+3,x:x+3]
-                    return False
 
         # Check all numbers are between 1-9 inclusive
         for y in range(0,9):
             for x in range(0,9):
                 if puzzle[y][x] > 9 or puzzle[y][x] < 1:
-                    # print "inc", x, y, puzzle[y][x]
+                    print "Invalid number at (%d, %d): %d" % (y, x, puzzle[y][x])
+                    return False
+
+        # Checks that a list contains all of 1-9.
+        # Returns the index of an invalid digit (0-8), or -1 if none are invalid.
+        def invalid(lst):
+            found = {}
+            for i, d in enumerate(lst):
+                if d in found:
+                    return i
+                else:
+                    found[d] = True
+            return -1
+
+        # Check rows
+        for y in range(0,9):
+            row = puzzle[y,:]
+            invalidDigit = invalid(row)
+            if invalidDigit >= 0:
+                print "Invalid number %d in row %d at position %d" % (row[invalidDigit], y, invalidDigit+1)
+                return False
+
+        # Check columns
+        for x in range(0,9):
+            col = puzzle[:,x]
+            invalidDigit = invalid(col)
+            if invalidDigit >= 0:
+                print "Invalid number %d in column %d at position %d" % (col[invalidDigit], x, invalidDigit+1)
+                return False
+
+        # Check boxes
+        for y in range(0,9,3):
+            for x in range(0,9,3):
+                box = puzzle[y:y+3,x:x+3].flatten()
+                invalidDigit = invalid(box)
+                if invalidDigit >= 0:
+                    print "Invalid number %d in box (%d, %d)" % (box[invalidDigit], y/3, x/3)
                     return False
 
         return True
