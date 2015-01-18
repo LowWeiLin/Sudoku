@@ -46,3 +46,19 @@ empty = [
     [0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0]
 ]
+
+hdiv = "+-----------------------+"
+
+row = "| {0} {1} {2} | {3} {4} {5} | {6} {7} {8} |"
+
+def prettify(puzzle):
+    stuff = []
+    for i in range(0, 9, 3):
+        stuff.append(hdiv)
+        for j in range(0, 3):
+            stuff.append(row.format(*puzzle[i+j]))
+    stuff.append(hdiv)
+    return '\n'.join(stuff)
+
+def prettyPrint(puzzle):
+    print prettify(puzzle)
