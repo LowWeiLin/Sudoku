@@ -1,3 +1,5 @@
+
+import Puzzles
 import numpy as np
 import cv2
 from SudokuExtractor import SudokuExtractor
@@ -259,7 +261,7 @@ manySolutions = [
 if __name__ == '__main__':
     extractor = SudokuExtractor()
     extractor.extract("sudoku_original.jpg")
-    puzzle = extractor.recognized_puzzle
+    puzzle = Puzzles.manySolutions
     solution = SudokuSolver().solve(puzzle)
     extractor.showOverlayPuzzle(solution, "Solved puzzle")
     cv2.waitKey()
