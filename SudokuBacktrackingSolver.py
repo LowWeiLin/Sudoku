@@ -98,4 +98,4 @@ class SudokuBacktrackingSolver:
 #
 if __name__ == '__main__':
     puzzle = Puzzles.manySolutions
-    solution = SudokuSolver().solve(puzzle)
+    solution = SudokuBacktrackingSolver().solve(puzzle)
