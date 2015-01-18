@@ -3,11 +3,10 @@
 Visual sudoku solver
 
 Extracts sudoku puzzle from an image and recognizes the digits.
-
-*Does not solve the puzzle (yet)
+Solves the puzzle with backtracking/constraint algorithms.
 
 <br><br><br>
-Some examples of recognized puzzles below. (recognized digits are in green)
+Some examples of recognized/solved puzzles below. (recognized digits are in green, answers are in blue)
 
 
 ![alt tag](https://dl.dropboxusercontent.com/u/85089697/Sudoku/Examples/example_1.png)

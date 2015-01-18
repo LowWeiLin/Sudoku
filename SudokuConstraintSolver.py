@@ -47,7 +47,7 @@ class SudokuConstraintSolver:
 
             potentialAnswersCount = self.countPotentialAnswers()
 
-        self.printPotentialSolutions()
+        #self.printPotentialSolutions()
         
         return self.potentialSolutions
 
