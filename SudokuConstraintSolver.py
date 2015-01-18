@@ -3,9 +3,10 @@ import Puzzles
 import numpy as np
 import cv2
 from SudokuExtractor import SudokuExtractor
+from SudokuBacktrackingSolver import SudokuBacktrackingSolver
 
 
-class SudokuSolver:
+class SudokuConstraintSolver:
     
     potentialSolutions = None
 
@@ -15,11 +16,7 @@ class SudokuSolver:
         self.initializeAllPotentialSolutions()
 
         # Set answers for fixed values in puzzle
-        for y in range(0,9):
-            for x in range(0,9):
-                if puzzle[y][x] != 0:
-                    ans = puzzle[y][x]
-                    self.setAnswer(x, y, ans)
+        self.setAnswersForFixedValues()
 
         potentialAnswersCount = self.countPotentialAnswers()
         while True:
@@ -35,30 +32,33 @@ class SudokuSolver:
                 print "Verification result:", self.verify(solution)
                 print solution
                 return solution
-            # stop if no change to potential solutions
-            elif potentialAnswersCount == self.countPotentialAnswers():
-                # multiple solutios
-                # find a cell with more than one possibility and pick one
-                picked = False
-                for y in range(0,9):
-                    for x in range(0,9):
-                        if len(self.potentialSolutions[y][x]) > 1:
-                            picked = True
-                            self.potentialSolutions[y][x] = [self.potentialSolutions[y][x][0]]
-                            break
-                    if picked:
-                        break
-                assert picked
             # stop if any cell has no potential answers
             elif self.noSolutionFound():
                 print "No solution found"
-                return None
+                self.printPotentialSolutions()
+                return []
+            # stop if no change to potential solutions
+            elif potentialAnswersCount == self.countPotentialAnswers():
+                # cannot determmine solution/multiple solutions
+                # use backtracking algorithm
+                # limit to at most 10 solutions
+                return SudokuBacktrackingSolver().solve(puzzle, 10)
+
 
             potentialAnswersCount = self.countPotentialAnswers()
 
         self.printPotentialSolutions()
         
         return self.potentialSolutions
+
+
+    def setAnswersForFixedValues(self):
+        for y in range(0,9):
+            for x in range(0,9):
+                if puzzle[y][x] != 0:
+                    ans = puzzle[y][x]
+                    self.setAnswer(x, y, ans)
+
 
     def printPotentialSolutions(self):
         # print potential solutions
@@ -70,6 +70,7 @@ class SudokuSolver:
         print "Number of potential answers:"
         for y in range(0,9):
             print map(len,self.potentialSolutions[y])
+
 
     def verify(self, puzzle):
 
@@ -117,6 +118,7 @@ class SudokuSolver:
                     return False
 
         return True
+
 
     def checkUniqueConstraint(self, x, y):
         # no need to check
@@ -210,6 +212,7 @@ class SudokuSolver:
                     return True
         return False
 
+
     # count number of potential answers
     def countPotentialAnswers(self):
         total = 0
@@ -229,31 +232,6 @@ class SudokuSolver:
                 for i in range(0,9):
                     self.potentialSolutions[y][x].append(i+1)
 
-        #print self.potentialSolutions
-
-oneSolution = [
-    [0, 0, 8, 6, 0, 2, 0, 0, 0],
-    [2, 5, 0, 9, 1, 7, 0, 0, 0],
-    [1, 0, 0, 0, 3, 0, 0, 0, 0],
-    [6, 4, 0, 0, 0, 0, 5, 0, 0],
-    [8, 0, 7, 5, 9, 3, 1, 0, 4],
-    [0, 0, 3, 0, 0, 0, 0, 9, 2],
-    [0, 0, 0, 0, 6, 0, 0, 0, 8],
-    [0, 0, 0, 3, 7, 8, 0, 1, 5],
-    [0, 0, 0, 1, 0, 9, 4, 0, 0]
-]
-
-manySolutions = [
-    [9, 0, 6, 0, 7, 0, 4, 0, 3],
-    [0, 0, 0, 4, 0, 0, 2, 0, 0],
-    [0, 7, 0, 0, 2, 3, 0, 1, 0],
-    [5, 0, 0, 0, 0, 0, 1, 0, 0],
-    [0, 4, 0, 2, 0, 8, 0, 6, 0],
-    [0, 0, 3, 0, 0, 0, 0, 0, 5],
-    [0, 3, 0, 7, 0, 0, 0, 5, 0],
-    [0, 0, 7, 0, 0, 5, 0, 0, 0],
-    [4, 0, 5, 0, 1, 0, 7, 0, 8]
-]
 
 #
 #   Main Entry Point
@@ -262,6 +240,7 @@ if __name__ == '__main__':
     extractor = SudokuExtractor()
     extractor.extract("sudoku_original.jpg")
     puzzle = Puzzles.manySolutions
-    solution = SudokuSolver().solve(puzzle)
-    extractor.showOverlayPuzzle(solution, "Solved puzzle")
+    solution = SudokuConstraintSolver().solve(puzzle)
+    if len(solution) >= 1:
+        extractor.showOverlayPuzzle(solution[0], "Solved puzzle")
     cv2.waitKey()

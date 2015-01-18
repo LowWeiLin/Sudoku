@@ -5,7 +5,7 @@ def copyList(xs):
     return [row[:] for row in xs]
 
 
-class SudokuSolver:
+class SudokuBacktrackingSolver:
     
     # puzzle should be a 9x9 array, with 0 representing empty cells,
     # and 1-9 representing fixed values in the puzzle.
@@ -92,13 +92,10 @@ class SudokuSolver:
         return solutions
 
 
+
 #
 #   Main Entry Point
 #
 if __name__ == '__main__':
-    # extractor = SudokuExtractor()
-    # extractor.extract("sudoku_original.jpg")
     puzzle = Puzzles.manySolutions
     solution = SudokuSolver().solve(puzzle)
-    # extractor.showOverlayPuzzle(solution, "Solved puzzle")
-    # cv2.waitKey()
