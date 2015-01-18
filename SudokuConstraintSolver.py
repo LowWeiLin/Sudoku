@@ -27,14 +27,14 @@ class SudokuConstraintSolver:
 
             # stop when unique solution is found
             if self.uniqueSolutionFound():
-                print "Unique solution found"
+                #print "Unique solution found"
                 solution = np.array(self.potentialSolutions).reshape((9,9))
-                print "Verification result:", self.verify(solution)
-                print solution
-                return solution
+                #print "Verification result:", self.verify(solution)
+                #print solution
+                return [solution]
             # stop if any cell has no potential answers
             elif self.noSolutionFound():
-                print "No solution found"
+                #print "No solution found"
                 self.printPotentialSolutions()
                 return []
             # stop if no change to potential solutions
@@ -238,9 +238,10 @@ class SudokuConstraintSolver:
 #
 if __name__ == '__main__':
     extractor = SudokuExtractor()
-    extractor.extract("sudoku_original.jpg")
-    puzzle = Puzzles.manySolutions
+    puzzle = extractor.extract("sudoku_original.jpg")
     solution = SudokuConstraintSolver().solve(puzzle)
     if len(solution) >= 1:
         extractor.showOverlayPuzzle(solution[0], "Solved puzzle")
+    else:
+        print "No solution found"
     cv2.waitKey()

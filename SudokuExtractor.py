@@ -45,6 +45,7 @@ class SudokuExtractor:
         self.simpleWarp()
         self.extractDigits()
         self.recognizeDigits()
+        return self.recognized_puzzle.tolist()
 
 
     def getPuzzle(self, image_filename):
